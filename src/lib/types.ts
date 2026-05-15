@@ -20,9 +20,15 @@ export interface DayPlan {
   meals: MealSlot[];
 }
 
+export interface PreferenceItem {
+  emoji: string;
+  text: string;
+  category: string;
+}
+
 export interface Preferences {
-  likes: string[];
-  dislikes: string[];
-  restrictions: string[];
+  likes: PreferenceItem[];
+  dislikes: PreferenceItem[];
+  restrictions: PreferenceItem[];
   notes: string;
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
-import { RefreshCw, Settings } from "lucide-react";
+import { RefreshCw, Settings, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { DayNav } from "@/components/day-nav";
 import { MealCard } from "@/components/meal-card";
@@ -14,6 +14,7 @@ export default function Home() {
   const [plan, setPlan] = useState<DayPlan | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAIPlan, setIsAIPlan] = useState(false);
 
   const dateKey = format(selectedDate, "yyyy-MM-dd");
 
@@ -24,12 +25,14 @@ export default function Home() {
   };
 
   const generatePlan = useCallback(
-    async (forceRefresh = false) => {
-      // Check cache first
-      if (!forceRefresh) {
+    async (useAI = false) => {
+      // Check cache first (only for non-AI requests)
+      if (!useAI) {
         const cached = localStorage.getItem(`nourish-plan-${dateKey}`);
         if (cached) {
-          setPlan(JSON.parse(cached));
+          const parsed = JSON.parse(cached);
+          setPlan(parsed);
+          setIsAIPlan(parsed._ai === true);
           return;
         }
       }
@@ -44,6 +47,7 @@ export default function Home() {
           body: JSON.stringify({
             date: dateKey,
             preferences: getPreferences(),
+            useAI,
           }),
         });
 
@@ -53,8 +57,10 @@ export default function Home() {
         }
 
         const data: DayPlan = await res.json();
+        const tagged = { ...data, _ai: useAI };
         setPlan(data);
-        localStorage.setItem(`nourish-plan-${dateKey}`, JSON.stringify(data));
+        setIsAIPlan(useAI);
+        localStorage.setItem(`nourish-plan-${dateKey}`, JSON.stringify(tagged));
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong");
       } finally {
@@ -65,7 +71,7 @@ export default function Home() {
   );
 
   useEffect(() => {
-    generatePlan();
+    generatePlan(false);
   }, [generatePlan]);
 
   return (
@@ -75,13 +81,26 @@ export default function Home() {
         <Link href="/preferences">
           <Settings className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />
         </Link>
-        <button
-          onClick={() => generatePlan(true)}
-          disabled={loading}
-          className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-        >
-          <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} />
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => generatePlan(true)}
+            disabled={loading}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 bg-muted/50 px-2.5 py-1.5 rounded-full"
+          >
+            <Sparkles className={`w-3.5 h-3.5 ${loading ? "animate-pulse" : ""}`} />
+            <span>AI</span>
+          </button>
+          <button
+            onClick={() => {
+              localStorage.removeItem(`nourish-plan-${dateKey}`);
+              generatePlan(false);
+            }}
+            disabled={loading}
+            className="text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} />
+          </button>
+        </div>
       </div>
 
       {/* Date Display */}
@@ -89,7 +108,9 @@ export default function Home() {
         <h1 className="text-3xl font-heading font-normal tracking-tight">
           {format(selectedDate, "EEE, MMM d")}
         </h1>
-        <p className="text-muted-foreground text-sm mt-1">Meal Plan</p>
+        <p className="text-muted-foreground text-sm mt-1">
+          Meal Plan{isAIPlan ? " · AI generated" : ""}
+        </p>
       </div>
 
       {/* Day Navigation */}
@@ -103,7 +124,7 @@ export default function Home() {
           <div className="text-center py-16">
             <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-3 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">
-              Generating your meal plan...
+              Loading meal plan...
             </p>
           </div>
         )}
@@ -112,7 +133,7 @@ export default function Home() {
           <div className="text-center py-16">
             <p className="text-sm text-destructive mb-2">{error}</p>
             <button
-              onClick={() => generatePlan(true)}
+              onClick={() => generatePlan(false)}
               className="text-sm underline text-muted-foreground"
             >
               Try again
@@ -126,7 +147,7 @@ export default function Home() {
 
       {loading && plan && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-foreground text-background px-4 py-2 rounded-full text-sm shadow-lg">
-          Refreshing...
+          Generating with AI...
         </div>
       )}
     </main>

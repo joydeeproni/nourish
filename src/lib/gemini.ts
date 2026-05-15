@@ -14,13 +14,13 @@ export async function generateMealPlan(
 IMPORTANT CONTEXT: The person is pregnant. All food must be pregnancy-safe.
 
 FOOD PREFERENCES - LIKES:
-${preferences.likes.map((l) => `- ${l}`).join("\n")}
+${preferences.likes.map((l) => `- ${typeof l === "string" ? l : l.text}`).join("\n")}
 
 FOOD PREFERENCES - DISLIKES:
-${preferences.dislikes.map((d) => `- ${d}`).join("\n")}
+${preferences.dislikes.map((d) => `- ${typeof d === "string" ? d : d.text}`).join("\n")}
 
 DIETARY RESTRICTIONS:
-${preferences.restrictions.map((r) => `- ${r}`).join("\n")}
+${preferences.restrictions.map((r) => `- ${typeof r === "string" ? r : r.text}`).join("\n")}
 
 ADDITIONAL NOTES:
 ${preferences.notes}
