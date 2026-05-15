@@ -86,7 +86,7 @@ export default function Home() {
 
       {/* Date Display */}
       <div className="text-center mb-5">
-        <h1 className="text-3xl font-semibold tracking-tight">
+        <h1 className="text-3xl font-heading font-normal tracking-tight">
           {format(selectedDate, "EEE, MMM d")}
         </h1>
         <p className="text-muted-foreground text-sm mt-1">Meal Plan</p>

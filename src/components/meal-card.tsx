@@ -93,7 +93,7 @@ export function MealCard({ meal }: { meal: MealSlot }) {
           ))}
         </div>
         <div className="text-center">
-          <p className="font-medium text-sm">{labelMap[meal.type]}</p>
+          <p className="font-heading font-normal text-sm">{labelMap[meal.type]}</p>
           <p className="text-xs text-muted-foreground">
             {meal.recipes.length} recipe{meal.recipes.length !== 1 ? "s" : ""}
           </p>

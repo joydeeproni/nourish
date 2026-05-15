@@ -105,7 +105,7 @@ export default function PreferencesPage() {
         <Link href="/">
           <ArrowLeft className="w-5 h-5 text-muted-foreground hover:text-foreground transition-colors" />
         </Link>
-        <h1 className="text-xl font-semibold">Food Preferences</h1>
+        <h1 className="text-xl font-heading font-normal">Food Preferences</h1>
       </div>
 
       <div className="space-y-6">
